@@ -1,12 +1,15 @@
 // Require the necessary discord.js classes
 const { Client, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+const { token, sixtyNineChannel } = require('./config.json');
 const TextToIPA = require('text-to-ipa');
-const Tesseract = require('tesseract.js');
-const { text } = require('stream/consumers');
+const env = require('dotenv').config();
+const vision = require('@google-cloud/vision');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+
+// Google cloud vision client
+const visionClient = new vision.ImageAnnotatorClient();
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
@@ -52,20 +55,28 @@ client.on('messageCreate', async message => {
 			});
 		});
 	}
-	if (message.attachments.size > 0)
+	if ((message.attachments.size > 0) && (message.channelId == sixtyNineChannel))
 	{
-		message.attachments.forEach(attachment => {
-			Tesseract.recognize(
-				attachment.proxyURL,
-				'eng',
-				{ logger: m => console.log(m) }
-			).then(({ data: { text } }) => {
-				console.log(text);
-				if (text.includes('69'))
+		console.log(message);
+		message.attachments.forEach(async attachment => {
+			const [result] = await visionClient.textDetection(attachment.proxyURL);
+			const detections = result.textAnnotations;
+			var BreakException = {};
+			try {
+				detections.forEach(text => {
+					console.log(text);
+					if (text.description.includes('69'))
+					{
+						message.reply('Nice!');
+						throw BreakException;
+					}	
+				});
+			} catch (e) {
+				if (e != BreakException)
 				{
-					message.reply('Nice!');
-				}					
-			});
+					throw e;
+				}
+			}
 		});
 	}
 });
