@@ -2,6 +2,8 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const TextToIPA = require('text-to-ipa');
+const Tesseract = require('tesseract.js');
+const { text } = require('stream/consumers');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -29,7 +31,11 @@ client.on('messageCreate', async message => {
 		lastWord = words[words.length - 1].toLowerCase();
 		// we can have multiple ipa notations, eg; her => hɚ OR hɚˈ
 		ipaText = TextToIPA.lookup(lastWord).text.split(" ")[0];
-		if(ipaText.endsWith("ɚ")) {
+		if (ipaText.endsWith("ɚ")) {
+			message.reply('I barely know \'er!');
+		}
+		else if (message.content.toLowerCase().includes('er?!'))
+		{
 			message.reply('I barely know \'er!');
 		}
 	}
@@ -43,6 +49,22 @@ client.on('messageCreate', async message => {
 		message.channel.messages.fetch({ limit : 2}).then(messages => {
 			messages.forEach(msg => {
 				msg.react('🇫');
+			});
+		});
+	}
+	if (message.attachments.size > 0)
+	{
+		message.attachments.forEach(attachment => {
+			Tesseract.recognize(
+				attachment.proxyURL,
+				'eng',
+				{ logger: m => console.log(m) }
+			).then(({ data: { text } }) => {
+				console.log(text);
+				if (text.includes('69'))
+				{
+					message.reply('Nice!');
+				}					
 			});
 		});
 	}

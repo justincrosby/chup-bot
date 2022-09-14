@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.3.0",
+    "tesseract.js": "^3.0.2",
     "text-to-ipa": "^1.0.0"
   }
 }
