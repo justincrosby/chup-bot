@@ -19,35 +19,37 @@ client.once('ready', () => {
 client.on('messageCreate', async message => {
 	if (message.author.bot) return false;
 
-	if (message.content.toLowerCase().includes('chup')) {
+	sanitizedMsg = message.content.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+	sanitizedMsg = sanitizedMsg.toLowerCase();
+	words = sanitizedMsg.split(" ");
+	var BreakException = {};
+	if (sanitizedMsg.includes('chup')) {
 		message.reply('chup!');
 		message.react('🏆');
 	}
-	if (message.content.toLowerCase().includes('go flames')) {
+	if (sanitizedMsg.includes('go flames')) {
 		message.reply('go flames!');
 		message.react('🔥');
 	}
-	if (message.content.toLowerCase().includes('?!'))
+	if (message.content.includes('?!'))
 	{
-		sanitizedMsg = message.content.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
-		words = sanitizedMsg.split(" ");
-		lastWord = words[words.length - 1].toLowerCase();
+		lastWord = words[words.length - 1];
 		// we can have multiple ipa notations, eg; her => hɚ OR hɚˈ
 		ipaText = TextToIPA.lookup(lastWord).text.split(" ")[0];
 		if (ipaText.endsWith("ɚ")) {
 			message.reply('I barely know \'er!');
 		}
-		else if (message.content.toLowerCase().includes('er?!'))
+		else if (message.content.includes('er?!'))
 		{
 			message.reply('I barely know \'er!');
 		}
 	}
-	if (message.content.toLowerCase().includes('motorcycle'))
+	if (sanitizedMsg.includes('motorcycle'))
 	{
 		message.reply('OOOKAYYYYYY!');
 		message.react('🏍️');
 	}
-	if (message.content == 'F')
+	if (sanitizedMsg == 'F')
 	{
 		message.channel.messages.fetch({ limit : 2}).then(messages => {
 			messages.forEach(msg => {
@@ -55,19 +57,36 @@ client.on('messageCreate', async message => {
 			});
 		});
 	}
+	// Hi Daryl
+	try {
+		words.forEach(word => {
+			if ((word == 'hi') || (word == 'hey') || (word == 'hello'))
+			{
+				message.reply('Hi Daryl');
+				throw BreakException;
+			}
+		});
+	} catch (e) {
+		if (e != BreakException)
+		{
+			throw e;
+		}
+	}
 	if ((message.attachments.size > 0) && (message.channelId == sixtyNineChannel))
 	{
 		console.log(message);
 		message.attachments.forEach(async attachment => {
 			const [result] = await visionClient.textDetection(attachment.proxyURL);
 			const detections = result.textAnnotations;
-			var BreakException = {};
 			try {
 				detections.forEach(text => {
-					console.log(text);
-					if (text.description.includes('69'))
+					sanitizedText = text.description.replace(/\s+/g, "");
+					sanitizedText = sanitizedText.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+					console.log(sanitizedText);
+					if (sanitizedText.includes('69'))
 					{
 						message.reply('Nice!');
+						message.react('♋');
 						throw BreakException;
 					}	
 				});
