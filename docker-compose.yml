@@ -1,0 +1,10 @@
+version: '1'
+services:
+  app:
+    build: .
+    volumes:
+      - /mnt/pool/apps/discord/chup-bot/:/chup-bot:rw
+    container_name: chup-bot
+    restart: always
+    command: npm run start
+    env_file: .env
